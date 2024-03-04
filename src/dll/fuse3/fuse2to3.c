@@ -478,6 +478,13 @@ static int fuse2to3_fallocate(const char *path, int mode, fuse_off_t off, fuse_o
     return res;
 }
 
+static int fuse2to3_getpath(const char* path, char* buf, size_t size,
+    struct fuse_file_info* fi)
+{
+    struct fuse3* f3 = fuse2to3_getfuse3();
+    return f3->ops.getpath(path, buf, size, 0);
+}
+
 static int fsp_fuse3_copy_args(struct fsp_fuse_env *env,
     const struct fuse_args *args,
     struct fuse_args *outargs)
@@ -613,6 +620,7 @@ FSP_FUSE_API int fsp_fuse3_mount(struct fsp_fuse_env *env,
         .read_buf = 0 != f3->ops.read_buf ? fuse2to3_read_buf : 0,
         .flock = 0 != f3->ops.flock ? fuse2to3_flock : 0,
         .fallocate = 0 != f3->ops.fallocate ? fuse2to3_fallocate : 0,
+        .getpath = 0 != f3->ops.getpath ? fuse2to3_getpath : 0,
     };
 
     ch = fsp_fuse_mount(env, mountpoint, &f3->args);
